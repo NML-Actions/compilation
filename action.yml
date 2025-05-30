@@ -1,0 +1,45 @@
+name: Compile C Code
+description: Downloads code, compiles, and runs a C program
+inputs:
+  c_file:
+    required: true
+    description: "C file to compile"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Download source code
+      uses: actions/download-artifact@v3
+      with:
+        name: source-code
+        path: .
+
+    - name: Install GCC (Linux)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc
+
+    - name: Install GCC (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        choco install mingw
+
+    - name: Compile
+      shell: bash
+      run: |
+        echo "Compiling ${{ inputs.c_file }}..."
+        ls -lh
+        gcc -o sample ${{ inputs.c_file }}
+
+    - name: Run (Linux)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: ./sample
+
+    - name: Run (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: ./sample.exe
